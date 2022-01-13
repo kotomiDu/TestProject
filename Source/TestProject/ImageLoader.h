@@ -1,11 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "Engine/Texture2D.h"
 #include "PixelFormat.h"
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "ImageLoader.generated.h"
+
+// Forward declarations
+class UTexture2D;
 
 /**
  * 
