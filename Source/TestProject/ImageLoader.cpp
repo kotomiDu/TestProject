@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 // This includes the precompiled header. Change this to whatever is relevant for your project.
-#include "TestProject.h"
 #include "ImageLoader.h"
+#include "TestProject.h"
 
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
@@ -43,7 +43,7 @@ TFuture<UTexture2D*> UImageLoader::LoadImageFromDiskAsync(UObject* Outer, const 
 {
 	// Run the image loading function asynchronously through a lambda expression, capturing the ImagePath string by value.
 	// Run it on the thread pool, so we can load multiple images simultaneously without interrupting other tasks.
-	return Async<UTexture2D*>(EAsyncExecution::ThreadPool, [=]() { return LoadImageFromDisk(Outer, ImagePath); }, CompletionCallback);
+	return Async(EAsyncExecution::ThreadPool, [=]() { return LoadImageFromDisk(Outer, ImagePath); }, MoveTemp(CompletionCallback));
 }
 
 UTexture2D* UImageLoader::LoadImageFromDisk(UObject* Outer, const FString& ImagePath)
@@ -83,9 +83,9 @@ UTexture2D* UImageLoader::LoadImageFromDisk(UObject* Outer, const FString& Image
 	//const TArray<uint8> RawData = nullptr;
 	TArray<uint8> RawData;
 	ImageWrapper->SetCompressed(FileData.GetData(), FileData.Num());
-	//ImageWrapper->GetRaw(ERGBFormat::BGRA, int32(8), RawData);
-	//if (RawData == nullptr)
-	if (ImageWrapper->GetRaw(ERGBFormat::BGRA, int32(8), RawData))
+	ImageWrapper->GetRaw(ERGBFormat::BGRA, 8, RawData);
+	if (RawData.GetAllocatedSize() == 0)
+	//if (ImageWrapper->GetRaw(ERGBFormat::BGRA, 8, RawData))
 	{
 		UIL_LOG(Error, TEXT("Failed to decompress image file: %s"), *ImagePath);
 		return nullptr;
@@ -128,5 +128,6 @@ UTexture2D* UImageLoader::CreateTexture(UObject* Outer,  TArray<uint8>& PixelDat
 	Mip->BulkData.Unlock();
 
 	NewTexture->UpdateResource();
+	UIL_LOG(Warning, TEXT("reachable %d"), NewTexture->IsUnreachable());
 	return NewTexture;
 }
